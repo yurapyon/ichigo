@@ -5,10 +5,12 @@ import { useRouter } from 'next/router';
 
 import Head from 'next/head'
 
-const MAX_MESSAGE_LEN = 100;
+function within(val, min, max) {
+  return val <= max && val >= min;
+}
 
 const LengthReadout: React.FC = (props) => {
-  if (props.len > props.max_len) {
+  if (!within(props.len, 1, props.max_len)) {
     return <><span style={{color: "red"}}>{props.len}</span>/{props.max_len}</>;
   } else {
     return <>{props.len}/{props.max_len}</>;
@@ -16,50 +18,57 @@ const LengthReadout: React.FC = (props) => {
 }
 
 const AskBox: React.FC = (props) => {
-  const [ contents, setContents ] = useState('');
-
-  const submit = () => {
-    console.log(props.user, contents)
-  };
-
-  const message_too_long = contents.length > MAX_MESSAGE_LEN;
-
   return (
-    <>
-
-    <p>
-    <textarea
-      style={{resize: "none"}}
-      rows={5}
-      cols={50}
-      onChange={(e)=>{setContents(e.target.value)}}
-    />
-    </p>
-
-    <p>
-    <LengthReadout len={contents.length} max_len={MAX_MESSAGE_LEN} />
-
-    <button
-      onClick={submit}
-      disabled={contents.length == 0 || message_too_long}
-    >
-    submit
-    </button>
-    </p>
-
-    </>
+    <form onSubmit={props.onSubmit} >
+      <div>
+        <textarea
+          style={{resize: "none"}}
+          rows={5}
+          cols={50}
+          onChange={props.changeMessage}
+        />
+      </div>
+      <div>
+        <LengthReadout len={props.message.length} max_len={props.max_len} />
+        <input
+          type="submit"
+          value="submit"
+          disabled={!within(props.message.length, 1, props.max_len)}
+        />
+      </div>
+    </form>
   );
 };
 
 const Home: NextPage = () => {
   const router = useRouter();
-  console.log(router);
   const { user } = router.query;
+  const [ message, setMessage ] = useState('');
+  const changeMessage = (e) => {
+    setMessage(e.target.value)
+  };
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      await fetch(`/api/user/${user}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: message,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
       <>
       <Head> </Head>
       {user}
-      <AskBox user={user}/>
+      <AskBox
+        onSubmit={submit}
+        changeMessage={changeMessage}
+        message={message}
+        max_len={100}
+      />
       </>
   )
 }
