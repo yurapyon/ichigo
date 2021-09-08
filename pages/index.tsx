@@ -26,12 +26,15 @@ function Post(props) {
 }
 
 function PostView(props) {
+  /*
   return (
     <>
     <h1> { props.feed[0].user.name } </h1>
     { props.feed.map(Post) }
     </>
   );
+  */
+  return null;
 }
 
 const Home: NextPage = ({ feed }) => {
