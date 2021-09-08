@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 
 import Head from 'next/head'
 
+import prisma from '../../lib/prisma.ts';
+
 function within(val, min, max) {
   return val <= max && val >= min;
 }
@@ -40,14 +42,22 @@ const AskBox: React.FC = (props) => {
   );
 };
 
-const Home: NextPage = () => {
+const Home: NextPage = (props) => {
   const router = useRouter();
   const { user } = router.query;
+
+  if (!props.user_found) {
+    return (<>
+      <Head> </Head>
+      user not found: {user}
+    </>);
+  }
+
   const [ message, setMessage ] = useState('');
   const changeMessage = (e) => {
     setMessage(e.target.value)
   };
-  const submit = async (e) => {
+  const submitMessage = async (e) => {
     e.preventDefault();
     try {
       await fetch(`/api/user/${user}`, {
@@ -64,13 +74,23 @@ const Home: NextPage = () => {
       <Head> </Head>
       {user}
       <AskBox
-        onSubmit={submit}
+        onSubmit={submitMessage}
         changeMessage={changeMessage}
         message={message}
         max_len={100}
       />
       </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const user = context.params.user;
+  const user_found = await prisma.user.findUnique({
+    where: { name: user }
+  });
+  return {
+    props: { user_found }
+  };
 }
 
 export default Home
