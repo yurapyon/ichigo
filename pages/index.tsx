@@ -2,6 +2,8 @@ import type { NextPage } from 'next';
 import { GetStaticProps } from "next"
 import prisma from '../lib/prisma.ts';
 
+import Header from '../lib/Header.tsx'
+
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
@@ -41,7 +43,9 @@ const Home: NextPage = ({ feed }) => {
   return (
       <>
       <Head> </Head>
+      <Header />
       <PostView feed={feed}/>
+      index page
       </>
   )
 }

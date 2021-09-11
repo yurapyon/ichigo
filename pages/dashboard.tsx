@@ -4,6 +4,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head'
 
 import prisma from '../lib/prisma.ts';
+import { getSession } from 'next-auth/react';
 
 const Message: React.FC = (props) => {
   return <p key={props.message.id}>{props.message.content}</p>;
@@ -15,7 +16,7 @@ const Dashboard: NextPage = (props) => {
     <>
     <Head> </Head>
     <p>
-    dashboard for: {props.user}
+    dashboard for: {props.session.user.name}
     </p>
     {props.messages.map((message)=>Message({message}))}
     </>
@@ -23,16 +24,17 @@ const Dashboard: NextPage = (props) => {
 }
 
 export async function getServerSideProps(context) {
-  const user = "mel";
+  const session = await getSession({req: context.req});
+
   const messages = await prisma.message.findMany({
     where: {
       user: {
-        name: user
+        name: session.user.name
       }
     }
   });
   return {
-    props: { user, messages }
+    props: { session, messages }
   };
 }
 
