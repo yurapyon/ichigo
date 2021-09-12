@@ -6,11 +6,34 @@ import Head from "next/head";
 
 import styles from "../styles/Submit.module.css";
 
-const LeftNav: React.FC = (props) => {
-  return <div className={styles.navLeft}>ichigo Q+A</div>;
+import type { Session } from "next-auth";
+
+const MaybeActiveLink: React.FC<{ href: string; linkName: string }> = (
+  props
+) => {
+  return useRouter().asPath === props.href ? (
+    <span
+      style={{
+        fontWeight: "bold",
+        textDecoration: "none",
+      }}
+    >
+      {props.linkName}
+    </span>
+  ) : (
+    <Link href={props.href}>{props.linkName}</Link>
+  );
 };
 
-const RightNav: React.FC = (props) => {
+const LeftNav: React.FC = () => {
+  return (
+    <div className={styles.navLeft}>
+      <MaybeActiveLink href="/" linkName="ichigo Q+A" />
+    </div>
+  );
+};
+
+const RightNav: React.FC<{ status: string; session?: Session }> = (props) => {
   if (props.status == "loading") {
     return <div className={styles.navRight}>loading...</div>;
   } else {
@@ -23,7 +46,13 @@ const RightNav: React.FC = (props) => {
     } else {
       return (
         <div className={styles.navRight}>
-          {props.session.user.name} <Link href="/settings">settings</Link>{" "}
+          {props.session.user?.name}{" "}
+          <MaybeActiveLink
+            href={"/user/" + props.session.user?.name}
+            linkName="submissions"
+          />{" "}
+          <MaybeActiveLink href="/dashboard" linkName="dashboard" />{" "}
+          <MaybeActiveLink href="/settings" linkName="settings" />{" "}
           <button onClick={() => signOut()}>
             <a>log out</a>
           </button>
@@ -34,10 +63,6 @@ const RightNav: React.FC = (props) => {
 };
 
 const Header: React.FC = () => {
-  const router = useRouter();
-  const isActive: (pathname: string) => boolean = (pathname) =>
-    router.pathname === pathname;
-
   const { data: session, status } = useSession({ required: false });
 
   return (
@@ -46,7 +71,7 @@ const Header: React.FC = () => {
       <div className={styles.header}>
         <nav className={styles.topNav}>
           <LeftNav />
-          <RightNav status={status} session={session} />
+          <RightNav status={status} session={session || undefined} />
         </nav>
       </div>
     </>

@@ -23,6 +23,23 @@
 
 /* */
 
+.home {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  margin: auto;
+}
+
+.home h3 {
+  margin: 0px;
+}
+
+.home p {
+  margin: 0.75em 0;
+}
+
+/* */
+
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -75,7 +92,7 @@
   padding: 10px;
   outline: none;
   border: 2px solid green;
-  border-radius: 10px;
+  border-radius: 5px;
   font-family: sans-serif;
   width: 400px;
   /*

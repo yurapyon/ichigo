@@ -7,6 +7,27 @@ import { getSession } from "next-auth/react";
 import Header from "../lib/Header.tsx";
 import styles from "../styles/Submit.module.css";
 
+function within(val, min, max) {
+  return val <= max && val >= min;
+}
+
+// TODO refactor
+const LengthReadout: React.FC = (props) => {
+  if (!within(props.len, 1, props.max_len)) {
+    return (
+      <>
+        <span style={{ color: "red" }}>{props.len}</span>/{props.max_len}
+      </>
+    );
+  } else {
+    return (
+      <>
+        {props.len}/{props.max_len}
+      </>
+    );
+  }
+};
+
 const BioBox: React.FC = (props) => {};
 
 class Settings extends React.Component {
@@ -25,8 +46,16 @@ class Settings extends React.Component {
     this.setState({ settings: s });
   }
 
-  submit() {
-    console.log("submitting: ", this.state.settings);
+  async submit() {
+    try {
+      await fetch(`/api/settings`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(this.state.settings),
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   render() {
@@ -34,25 +63,33 @@ class Settings extends React.Component {
       <div className={styles.container}>
         <Header />
         <div className={styles.settings}>
-          <form onSubmit={props.submitter.submitMessage}>
-            <textarea
-              style={{ resize: "none" }}
-              rows={5}
-              onChange={props.submitter.changeMessage}
-              placeholder="say something nice~"
-              value={props.submitter.message}
-            />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              this.submit();
+            }}
+          >
+            <div>
+              bio{" "}
+              <textarea
+                style={{ resize: "none" }}
+                rows={5}
+                onChange={(e) => this.handleChange(e.target.value, "bio")}
+                value={this.state.settings.bio}
+              />{" "}
+              <LengthReadout
+                len={this.state.settings.bio.length}
+                max_len={100}
+              />
+            </div>
             <div>
               <input
                 type="submit"
                 value="submit"
                 disabled={
-                  !within(props.submitter.message.length, 1, props.max_len)
+                  //!within(this.props.submitter.message.length, 1, props.max_len)
+                  false
                 }
-              />
-              <LengthReadout
-                len={props.submitter.message.length}
-                max_len={props.max_len}
               />
             </div>
           </form>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState } from "react";
 
 import type { NextPage } from "next";
 
@@ -12,12 +12,31 @@ const Message: React.FC = (props) => {
   return (
     <div className={styles.message} key={props.message.id}>
       <p>{props.message.content}</p>
-      <button>delete</button>
+      <p>{props.message.createdAt}</p>
+      <button onClick={() => props.deleteMessage(props.message.id)}>
+        delete
+      </button>
     </div>
   );
 };
 
 const Dashboard: NextPage = (props) => {
+  const [messages, setMessages] = useState(props.messages);
+
+  const deleteMessage = async (id) => {
+    try {
+      await fetch(`/api/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(id),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    setMessages(messages.filter((msg) => msg.id != id));
+  };
+
   return (
     <div className={styles.container}>
       <Header />
@@ -25,7 +44,9 @@ const Dashboard: NextPage = (props) => {
         <p>
           <strong>dashboard for: {props.session.user.name}</strong>
         </p>
-        {props.messages.map((message) => Message({ message }))}
+        {messages
+          .reverse()
+          .map((message) => Message({ message, deleteMessage }))}
       </div>
     </div>
   );
@@ -41,6 +62,9 @@ export async function getServerSideProps(context) {
       },
     },
   });
+  for (var msg of messages) {
+    msg.createdAt = msg.createdAt.toString();
+  }
   return {
     props: { session, messages },
   };

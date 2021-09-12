@@ -11,11 +11,12 @@ generator client {
 }
 
 model Message {
-  id      Int      @default(autoincrement()) @id
-  content String
-  tags    String[]
-  user    User?    @relation(fields: [userId], references: [id])
-  userId  String?
+  id        Int      @default(autoincrement()) @id
+  content   String
+  tags      String[]
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  createdAt DateTime @default(now())
 }
 
 model Account {
