@@ -2,21 +2,32 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
+import Head from "next/head";
+
+import styles from "../styles/Submit.module.css";
+
+const LeftNav: React.FC = (props) => {
+  return <div className={styles.navLeft}>ichigo Q+A</div>;
+};
 
 const RightNav: React.FC = (props) => {
   if (props.status == "loading") {
-    return <p>loading...</p>;
+    return <div className={styles.navRight}>loading...</div>;
   } else {
     if (!props.session) {
-      return <Link href="/api/auth/signin">log in</Link>;
+      return (
+        <div className={styles.navRight}>
+          <Link href="/api/auth/signin">log in</Link>
+        </div>
+      );
     } else {
       return (
-        <p>
-          {props.session.user.name} ({props.session.user.email})
+        <div className={styles.navRight}>
+          {props.session.user.name} <Link href="/settings">settings</Link>{" "}
           <button onClick={() => signOut()}>
             <a>log out</a>
           </button>
-        </p>
+        </div>
       );
     }
   }
@@ -30,9 +41,15 @@ const Header: React.FC = () => {
   const { data: session, status } = useSession({ required: false });
 
   return (
-    <nav>
-      <RightNav status={status} session={session} />
-    </nav>
+    <>
+      <Head> </Head>
+      <div className={styles.header}>
+        <nav className={styles.topNav}>
+          <LeftNav />
+          <RightNav status={status} session={session} />
+        </nav>
+      </div>
+    </>
   );
 };
 

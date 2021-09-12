@@ -1,7 +1,7 @@
 import prisma from "../../../lib/prisma.ts";
 
 export default async function handle(req, res) {
-  const user = req.query.user;
+  const user = req.query.username;
   const message = req.body;
 
   const result = await prisma.message.create({

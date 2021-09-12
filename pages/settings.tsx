@@ -1,37 +1,21 @@
 import type { NextPage } from "next";
 import React, { useState } from "react";
 
-const defaultSettings = {
-  a: false,
-  b: true,
-  c: false,
-  num1: 10,
-  num2: 0,
-};
+import prisma from "../lib/prisma.ts";
+import { getSession } from "next-auth/react";
 
-const Button: React.FC = (props) => {
-  return (
-    <>
-      <input type="checkbox" onChange={props.onChange} checked={props.value} />
-      {props.value ? props.name.toUpperCase() : props.name}
-    </>
-  );
-};
+import Header from "../lib/Header.tsx";
+import styles from "../styles/Submit.module.css";
 
-const Slider: React.FC = (props) => {
-  return (
-    <>
-      <input type="number" onChange={props.onChange} value={props.value} />
-      {props.value}
-    </>
-  );
-};
+const BioBox: React.FC = (props) => {};
 
 class Settings extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      settings: { ...defaultSettings },
+      settings: {
+        bio: props.user.bio,
+      },
     };
   }
 
@@ -41,61 +25,54 @@ class Settings extends React.Component {
     this.setState({ settings: s });
   }
 
-  renderSlider(name) {
-    return (
-      <Slider
-        name={name}
-        value={this.state.settings[name]}
-        onChange={(e) => this.handleChange(e.target.value, name)}
-      />
-    );
-  }
-
-  renderButton(name) {
-    return (
-      <Button
-        name={name}
-        value={this.state.settings[name]}
-        onChange={(e) => {
-          console.log(e);
-          this.handleChange(e.target.checked, name);
-        }}
-      />
-    );
-  }
-
   submit() {
     console.log("submitting: ", this.state.settings);
   }
 
   render() {
     return (
-      <>
-        <p> {this.renderButton("a")} </p>
-        <p> {this.renderButton("b")} </p>
-        <p> {this.renderButton("c")} </p>
-        <p> {this.renderSlider("num1")} </p>
-        <p> {this.renderSlider("num2")} </p>
-        <p>
-          {" "}
-          <input
-            type="button"
-            value="submit"
-            onClick={() => this.submit()}
-          />{" "}
-        </p>
-      </>
+      <div className={styles.container}>
+        <Header />
+        <div className={styles.settings}>
+          <form onSubmit={props.submitter.submitMessage}>
+            <textarea
+              style={{ resize: "none" }}
+              rows={5}
+              onChange={props.submitter.changeMessage}
+              placeholder="say something nice~"
+              value={props.submitter.message}
+            />
+            <div>
+              <input
+                type="submit"
+                value="submit"
+                disabled={
+                  !within(props.submitter.message.length, 1, props.max_len)
+                }
+              />
+              <LengthReadout
+                len={props.submitter.message.length}
+                max_len={props.max_len}
+              />
+            </div>
+          </form>
+        </div>
+      </div>
     );
   }
 }
 
-/*
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // find settings by user
-  const settings = await prisma.settings.findUnique({
+export async function getServerSideProps(context) {
+  const session = await getSession({ req: context.req });
+
+  const user = await prisma.user.findUnique({
+    where: {
+      name: session.user.name,
+    },
   });
-  return { props: { settings } };
+  return {
+    props: { session, user },
+  };
 }
-*/
 
 export default Settings;

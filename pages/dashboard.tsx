@@ -1,25 +1,33 @@
 import React from "react";
 
 import type { NextPage } from "next";
-import Head from "next/head";
 
 import prisma from "../lib/prisma.ts";
 import { getSession } from "next-auth/react";
+
 import Header from "../lib/Header.tsx";
+import styles from "../styles/Submit.module.css";
 
 const Message: React.FC = (props) => {
-  return <p key={props.message.id}>{props.message.content}</p>;
+  return (
+    <div className={styles.message} key={props.message.id}>
+      <p>{props.message.content}</p>
+      <button>delete</button>
+    </div>
+  );
 };
 
 const Dashboard: NextPage = (props) => {
-  console.log(props);
   return (
-    <>
-      <Head> </Head>
+    <div className={styles.container}>
       <Header />
-      <p>dashboard for: {props.session.user.name}</p>
-      {props.messages.map((message) => Message({ message }))}
-    </>
+      <div className={styles.dashboard}>
+        <p>
+          <strong>dashboard for: {props.session.user.name}</strong>
+        </p>
+        {props.messages.map((message) => Message({ message }))}
+      </div>
+    </div>
   );
 };
 
