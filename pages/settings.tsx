@@ -1,5 +1,5 @@
-import type { NextPage } from 'next';
-import React, { useState } from 'react';
+import type { NextPage } from "next";
+import React, { useState } from "react";
 
 const defaultSettings = {
   a: false,
@@ -12,35 +12,31 @@ const defaultSettings = {
 const Button: React.FC = (props) => {
   return (
     <>
-    <input
-      type="checkbox"
-      onChange={props.onChange}
-      checked={props.value}
-      />
-    {props.value ? props.name.toUpperCase() : props.name }
+      <input type="checkbox" onChange={props.onChange} checked={props.value} />
+      {props.value ? props.name.toUpperCase() : props.name}
     </>
   );
-}
+};
 
-const Slider: React.FC = (props) =>{
+const Slider: React.FC = (props) => {
   return (
     <>
-    <input type="number" onChange={props.onChange} value={props.value} />
-    {props.value}
+      <input type="number" onChange={props.onChange} value={props.value} />
+      {props.value}
     </>
   );
-}
+};
 
 class Settings extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      settings: {...defaultSettings},
+      settings: { ...defaultSettings },
     };
   }
 
   handleChange(val, name) {
-    var s = {...this.state.settings};
+    var s = { ...this.state.settings };
     s[name] = val;
     this.setState({ settings: s });
   }
@@ -50,7 +46,7 @@ class Settings extends React.Component {
       <Slider
         name={name}
         value={this.state.settings[name]}
-        onChange={(e)=>this.handleChange(e.target.value, name)}
+        onChange={(e) => this.handleChange(e.target.value, name)}
       />
     );
   }
@@ -60,7 +56,10 @@ class Settings extends React.Component {
       <Button
         name={name}
         value={this.state.settings[name]}
-        onChange={(e)=>{console.log(e); this.handleChange(e.target.checked, name)}}
+        onChange={(e) => {
+          console.log(e);
+          this.handleChange(e.target.checked, name);
+        }}
       />
     );
   }
@@ -71,19 +70,22 @@ class Settings extends React.Component {
 
   render() {
     return (
-    <>
-      <p> {this.renderButton("a")} </p>
-      <p> {this.renderButton("b")} </p>
-      <p> {this.renderButton("c")} </p>
-      <p> {this.renderSlider("num1")} </p>
-      <p> {this.renderSlider("num2")} </p>
-      <p> <input
-        type="button"
-        value="submit"
-        onClick={()=>this.submit()}
-        /> </p>
-    </>
-  );
+      <>
+        <p> {this.renderButton("a")} </p>
+        <p> {this.renderButton("b")} </p>
+        <p> {this.renderButton("c")} </p>
+        <p> {this.renderSlider("num1")} </p>
+        <p> {this.renderSlider("num2")} </p>
+        <p>
+          {" "}
+          <input
+            type="button"
+            value="submit"
+            onClick={() => this.submit()}
+          />{" "}
+        </p>
+      </>
+    );
   }
 }
 
@@ -96,4 +98,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 }
 */
 
-export default Settings
+export default Settings;

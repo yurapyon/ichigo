@@ -1,4 +1,4 @@
-import prisma from '../../../lib/prisma.ts';
+import prisma from "../../../lib/prisma.ts";
 
 export default async function handle(req, res) {
   const user = req.query.user;

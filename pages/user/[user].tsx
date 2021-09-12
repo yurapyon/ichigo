@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import type { NextPage } from 'next';
-import { useRouter } from 'next/router';
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
 
-import Head from 'next/head'
+import Head from "next/head";
 
-import prisma from '../../lib/prisma.ts';
+import prisma from "../../lib/prisma.ts";
+
+import Header from "../../lib/Header.tsx";
 
 function within(val, min, max) {
   return val <= max && val >= min;
@@ -13,18 +15,26 @@ function within(val, min, max) {
 
 const LengthReadout: React.FC = (props) => {
   if (!within(props.len, 1, props.max_len)) {
-    return <><span style={{color: "red"}}>{props.len}</span>/{props.max_len}</>;
+    return (
+      <>
+        <span style={{ color: "red" }}>{props.len}</span>/{props.max_len}
+      </>
+    );
   } else {
-    return <>{props.len}/{props.max_len}</>;
+    return (
+      <>
+        {props.len}/{props.max_len}
+      </>
+    );
   }
-}
+};
 
 const AskBox: React.FC = (props) => {
   return (
-    <form onSubmit={props.onSubmit} >
+    <form onSubmit={props.onSubmit}>
       <div>
         <textarea
-          style={{resize: "none"}}
+          style={{ resize: "none" }}
           rows={5}
           cols={50}
           onChange={props.changeMessage}
@@ -47,22 +57,25 @@ const Home: NextPage = (props) => {
   const { user } = router.query;
 
   if (!props.user_found) {
-    return (<>
-      <Head> </Head>
-      user not found: {user}
-    </>);
+    return (
+      <>
+        <Head> </Head>
+        <Header />
+        user not found: {user}
+      </>
+    );
   }
 
-  const [ message, setMessage ] = useState('');
+  const [message, setMessage] = useState("");
   const changeMessage = (e) => {
-    setMessage(e.target.value)
+    setMessage(e.target.value);
   };
   const submitMessage = async (e) => {
     e.preventDefault();
     try {
       await fetch(`/api/user/${user}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
         body: message,
       });
     } catch (error) {
@@ -70,8 +83,9 @@ const Home: NextPage = (props) => {
     }
   };
   return (
-      <>
+    <>
       <Head> </Head>
+      <Header />
       {user}
       <AskBox
         onSubmit={submitMessage}
@@ -79,18 +93,18 @@ const Home: NextPage = (props) => {
         message={message}
         max_len={100}
       />
-      </>
-  )
-}
+    </>
+  );
+};
 
 export async function getServerSideProps(context) {
   const user = context.params.user;
   const user_found = await prisma.user.findUnique({
-    where: { name: user }
+    where: { name: user },
   });
   return {
-    props: { user_found }
+    props: { user_found },
   };
 }
 
-export default Home
+export default Home;

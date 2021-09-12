@@ -1,9 +1,9 @@
-import NextAuth from "next-auth"
-import GithubProvider from "next-auth/providers/github"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
+import NextAuth from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -13,4 +13,4 @@ export default NextAuth({
       clientSecret: process.env.GITHUB_SECRET,
     }),
   ],
-})
+});
