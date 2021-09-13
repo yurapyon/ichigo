@@ -1,20 +1,13 @@
 import React, { useState } from "react";
-
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
-
 import Head from "next/head";
 import Image from "next/image";
-
-import prisma from "../../lib/prisma.ts";
+import { useRouter } from "next/router";
+import { PrismaClient } from "@prisma/client";
 
 import Header from "../../lib/Header.tsx";
-
+import LengthReadout, { within } from "../../lib/LengthReadout.tsx";
 import styles from "../../styles/Submit.module.css";
-
-function within(val, min, max) {
-  return val <= max && val >= min;
-}
 
 const useMessageSubmitter = (username) => {
   const [message, setMessage] = useState("");
@@ -39,22 +32,6 @@ const useMessageSubmitter = (username) => {
   };
 
   return { message, changeMessage, submitMessage };
-};
-
-const LengthReadout: React.FC = (props) => {
-  if (!within(props.len, 1, props.max_len)) {
-    return (
-      <>
-        <span style={{ color: "red" }}>{props.len}</span>/{props.max_len}
-      </>
-    );
-  } else {
-    return (
-      <>
-        {props.len}/{props.max_len}
-      </>
-    );
-  }
 };
 
 const ProfileView: React.FC = (props) => {
@@ -88,11 +65,11 @@ const AskBox: React.FC = (props) => {
           <input
             type="submit"
             value="submit"
-            disabled={!within(props.submitter.message.length, 1, props.max_len)}
+            disabled={!within(props.submitter.message.length, 1, props.maxLen)}
           />
           <LengthReadout
             len={props.submitter.message.length}
-            max_len={props.max_len}
+            maxLen={props.maxLen}
           />
         </div>
       </form>
@@ -120,13 +97,15 @@ const SubmitPage: NextPage = (props) => {
       <Header />
       <div className={styles.submitPage}>
         <ProfileView user={props.user} />
-        <AskBox submitter={submitter} max_len={100} />
+        <AskBox submitter={submitter} maxLen={100} />
       </div>
     </div>
   );
 };
 
 export async function getServerSideProps(context) {
+  const prisma = new PrismaClient();
+
   const username = context.params.username;
   const user = await prisma.user.findUnique({
     where: { name: username },

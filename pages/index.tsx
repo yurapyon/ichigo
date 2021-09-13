@@ -14,7 +14,7 @@ const Home: NextPage = ({ feed }) => {
           <Image src="/logo_words.png" width={380} height={150} />
         </p>
         <p>
-          ichigo is a better anonymous q+a service for streamers!{" "}
+          ichigo is an anonymous q+a service for streamers!{" "}
           <Link href="https://github.com/yurapyon/ichigo">
             ichigo on github
           </Link>

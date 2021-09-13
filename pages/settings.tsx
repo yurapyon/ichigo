@@ -1,34 +1,11 @@
-import type { NextPage } from "next";
 import React, { useState } from "react";
-
-import prisma from "../lib/prisma.ts";
+import type { NextPage } from "next";
+import { PrismaClient } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
 import Header from "../lib/Header.tsx";
+import LengthReadout from "../lib/LengthReadout.tsx";
 import styles from "../styles/Submit.module.css";
-
-function within(val, min, max) {
-  return val <= max && val >= min;
-}
-
-// TODO refactor
-const LengthReadout: React.FC = (props) => {
-  if (!within(props.len, 1, props.max_len)) {
-    return (
-      <>
-        <span style={{ color: "red" }}>{props.len}</span>/{props.max_len}
-      </>
-    );
-  } else {
-    return (
-      <>
-        {props.len}/{props.max_len}
-      </>
-    );
-  }
-};
-
-const BioBox: React.FC = (props) => {};
 
 class Settings extends React.Component {
   constructor(props) {
@@ -79,7 +56,7 @@ class Settings extends React.Component {
               />{" "}
               <LengthReadout
                 len={this.state.settings.bio.length}
-                max_len={100}
+                maxLen={100}
               />
             </div>
             <div>
@@ -87,7 +64,7 @@ class Settings extends React.Component {
                 type="submit"
                 value="submit"
                 disabled={
-                  //!within(this.props.submitter.message.length, 1, props.max_len)
+                  // TODO disable
                   false
                 }
               />
@@ -101,6 +78,7 @@ class Settings extends React.Component {
 
 export async function getServerSideProps(context) {
   const session = await getSession({ req: context.req });
+  const prisma = new PrismaClient();
 
   const user = await prisma.user.findUnique({
     where: {

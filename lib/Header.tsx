@@ -1,25 +1,17 @@
 import React from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import type { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
-import Head from "next/head";
 
 import styles from "../styles/Submit.module.css";
-
-import type { Session } from "next-auth";
 
 const MaybeActiveLink: React.FC<{ href: string; linkName: string }> = (
   props
 ) => {
   return useRouter().asPath === props.href ? (
-    <span
-      style={{
-        fontWeight: "bold",
-        textDecoration: "none",
-      }}
-    >
-      {props.linkName}
-    </span>
+    <strong>{props.linkName} </strong>
   ) : (
     <Link href={props.href}>{props.linkName}</Link>
   );
@@ -46,13 +38,13 @@ const RightNav: React.FC<{ status: string; session?: Session }> = (props) => {
     } else {
       return (
         <div className={styles.navRight}>
-          {props.session.user?.name}{" "}
           <MaybeActiveLink
             href={"/user/" + props.session.user?.name}
             linkName="submissions"
           />{" "}
           <MaybeActiveLink href="/dashboard" linkName="dashboard" />{" "}
           <MaybeActiveLink href="/settings" linkName="settings" />{" "}
+          {"- "}{props.session.user?.name} {" "}
           <button onClick={() => signOut()}>
             <a>log out</a>
           </button>
