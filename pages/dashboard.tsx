@@ -1,13 +1,16 @@
-import React, {useState } from "react";
-import type { NextPage } from "next";
+import React, { useState } from "react";
+import type { NextPage, GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
+import type { Message } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
-import Header from "../lib/Header.tsx";
+import Header from "../lib/Header";
 import styles from "../styles/Submit.module.css";
 
-// TODO
-const Message: React.FC = (props) => {
+const MessageView: React.FC<{
+  message: Message;
+  deleteMessage: (id: number) => {};
+}> = (props) => {
   return (
     <div className={styles.message} key={props.message.id}>
       <p>{props.message.content}</p>
@@ -19,10 +22,10 @@ const Message: React.FC = (props) => {
   );
 };
 
-const Dashboard: NextPage = (props) => {
+const Dashboard: NextPage<{ messages: Message[] }> = (props) => {
   const [messages, setMessages] = useState(props.messages);
 
-  const deleteMessage = async (id) => {
+  const deleteMessage = async (id: number) => {
     try {
       await fetch(`/api/delete`, {
         method: "POST",
@@ -42,30 +45,29 @@ const Dashboard: NextPage = (props) => {
       <div className={styles.dashboard}>
         {messages
           .reverse()
-          .map((message) => Message({ message, deleteMessage }))}
+          .map((message) => MessageView({ message, deleteMessage }))}
       </div>
     </div>
   );
 };
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession({ req: context.req });
   const prisma = new PrismaClient();
+
+  // TODO handle !session !user
 
   const messages = await prisma.message.findMany({
     where: {
       user: {
-        name: session.user.name,
+        name: session?.user?.name,
       },
     },
   });
-  // TODO
-  for (var msg of messages) {
-    msg.createdAt = JSON.stringify(msg.createdAt);
-  }
+
   return {
-    props: { session, messages },
+    props: { messages },
   };
-}
+};
 
 export default Dashboard;

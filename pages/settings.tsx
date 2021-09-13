@@ -1,93 +1,96 @@
 import React, { useState } from "react";
-import type { NextPage } from "next";
+import type { NextPage, GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
-import Header from "../lib/Header.tsx";
-import LengthReadout from "../lib/LengthReadout.tsx";
+import Header from "../lib/Header";
+import LengthReadout from "../lib/LengthReadout";
 import styles from "../styles/Submit.module.css";
 
-class Settings extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      settings: {
-        bio: props.user.bio,
-      },
-    };
-  }
+type UserBio = string | null;
 
-  handleChange(val, name) {
-    var s = { ...this.state.settings };
-    s[name] = val;
-    this.setState({ settings: s });
-  }
+interface UserSettings {
+  bio: UserBio;
+}
 
-  async submit() {
+const Settings: React.FC<{ user: User }> = (props) => {
+  const [settings, setSettings] = useState({
+    bio: props.user.bio,
+  });
+
+  const setBio = (to: UserBio) => {
+    var s = { ...settings };
+    s.bio = to;
+    setSettings(s);
+  };
+
+  const submitSettings = async () => {
     try {
       await fetch(`/api/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(this.state.settings),
+        body: JSON.stringify(settings),
       });
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
-  render() {
-    return (
-      <div className={styles.container}>
-        <Header />
-        <div className={styles.settings}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              this.submit();
-            }}
-          >
-            <div>
-              bio{" "}
-              <textarea
-                style={{ resize: "none" }}
-                rows={5}
-                onChange={(e) => this.handleChange(e.target.value, "bio")}
-                value={this.state.settings.bio}
-              />{" "}
-              <LengthReadout
-                len={this.state.settings.bio.length}
-                maxLen={100}
-              />
-            </div>
-            <div>
-              <input
-                type="submit"
-                value="submit"
-                disabled={
-                  // TODO disable
-                  false
-                }
-              />
-            </div>
-          </form>
-        </div>
+  return (
+    <div className={styles.container}>
+      <Header />
+      <div className={styles.settings}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitSettings();
+          }}
+        >
+          <div>
+            bio{" "}
+            <textarea
+              style={{ resize: "none" }}
+              rows={5}
+              onChange={(e) => setBio(e.target.value || null)}
+              value={settings.bio || ""}
+            />{" "}
+            <LengthReadout
+              len={settings.bio ? settings.bio.length : 0}
+              maxLen={100}
+            />
+          </div>
+          <div>
+            <input
+              type="submit"
+              value="submit"
+              disabled={
+                // TODO disable
+                false
+              }
+            />
+          </div>
+        </form>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession({ req: context.req });
   const prisma = new PrismaClient();
 
+  // TODO handle !session !user
+
   const user = await prisma.user.findUnique({
     where: {
-      name: session.user.name,
+      name: session?.user?.name || undefined,
     },
   });
+
   return {
-    props: { session, user },
+    props: { user },
   };
-}
+};
 
 export default Settings;

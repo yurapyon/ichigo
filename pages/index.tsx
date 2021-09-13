@@ -2,10 +2,10 @@ import type { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import Header from "../lib/Header.tsx";
+import Header from "../lib/Header";
 import styles from "../styles/Submit.module.css";
 
-const Home: NextPage = ({ feed }) => {
+const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Header />
@@ -22,7 +22,7 @@ const Home: NextPage = ({ feed }) => {
         <h3>Planned Features:</h3>
         <ul>
           <li>
-            provide tools for streamers to organize messages they've recieved for
+            provide tools for streamers to organize messages they{"'"}ve recieved for
             presentation on-stream.
             <ul>
               <li>
