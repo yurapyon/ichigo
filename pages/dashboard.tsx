@@ -14,7 +14,7 @@ const MessageView: React.FC<{
   return (
     <div className={styles.message} key={props.message.id}>
       <p>{props.message.content}</p>
-      <p>{props.message.createdAt}</p>
+      <p>{props.message.createdAt.toString()}</p>
       <button onClick={() => props.deleteMessage(props.message.id)}>
         delete
       </button>
