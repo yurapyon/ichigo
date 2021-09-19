@@ -25,48 +25,39 @@ const LeftNav: React.FC = () => {
   );
 };
 
-const RightNav: React.FC<{ status: string; session?: Session }> = (props) => {
-  if (props.status == "loading") {
-    return <div className={styles.navRight}>loading...</div>;
+const RightNav: React.FC<{ session?: Session }> = (props) => {
+  if (!props.session) {
+    return (
+      <div className={styles.navRight}>
+        <Link href="/api/auth/signin">log in</Link>
+      </div>
+    );
   } else {
-    if (!props.session) {
-      return (
-        <div className={styles.navRight}>
-          <Link href="/api/auth/signin">log in</Link>
-        </div>
-      );
-    } else {
-      return (
-        <div className={styles.navRight}>
-          <MaybeActiveLink
-            href={"/user/" + props.session.user?.name}
-            linkName="submissions"
-          />{" "}
-          <MaybeActiveLink href="/dashboard" linkName="dashboard" />{" "}
-          <MaybeActiveLink href="/settings" linkName="settings" />{" "}
-          {"- "}{props.session.user?.name} {" "}
-          <button onClick={() => signOut()}>
-            <a>log out</a>
-          </button>
-        </div>
-      );
-    }
+    return (
+      <div className={styles.navRight}>
+        <MaybeActiveLink
+          href={"/user/" + props.session.user?.name}
+          linkName="submissions"
+        />{" "}
+        <MaybeActiveLink href="/dashboard" linkName="dashboard" />{" "}
+        <MaybeActiveLink href="/settings" linkName="settings" /> {"- "}
+        {props.session.user?.name}{" "}
+        <button onClick={() => signOut()}>
+          <a>log out</a>
+        </button>
+      </div>
+    );
   }
 };
 
-const Header: React.FC = () => {
-  const { data: session, status } = useSession({ required: false });
-
+const Header: React.FC<{ session?: Session }> = ({ session }) => {
   return (
-    <>
-      <Head> </Head>
-      <div className={styles.header}>
-        <nav className={styles.topNav}>
-          <LeftNav />
-          <RightNav status={status} session={session || undefined} />
-        </nav>
-      </div>
-    </>
+    <div className={styles.header}>
+      <nav className={styles.topNav}>
+        <LeftNav />
+        <RightNav session={session || undefined} />
+      </nav>
+    </div>
   );
 };
 

@@ -1,0 +1,6 @@
+global prisma client
+better css
+simple spam filtering
+ip blocking
+allow multiple users to access the same acct (for i.e. mods)
+  decouple users and user profile/message inbox ?

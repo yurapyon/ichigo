@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import type { NextPage, GetServerSideProps } from "next";
-import { PrismaClient } from "@prisma/client";
 import type { Message } from "@prisma/client";
 import { getSession } from "next-auth/react";
+import { PrismaClient } from "@prisma/client";
 
 import Header from "../lib/Header";
 import styles from "../styles/Submit.module.css";
+import { trpc } from "../utils/trpc";
+
+import type { AppRouter } from "./api/trpc/[trpc]";
+import { createTRPCClient } from "@trpc/client";
+
+const client = createTRPCClient<AppRouter>({
+  url: "http://localhost:3000/api/trpc",
+});
 
 const MessageView: React.FC<{
   message: Message;
@@ -22,31 +30,17 @@ const MessageView: React.FC<{
   );
 };
 
-const Dashboard: NextPage<{ messages: Message[] }> = (props) => {
+const Dashboard: NextPage<{messages: Message[]}> = (props) => {
   const [messages, setMessages] = useState(props.messages);
 
   const deleteMessage = async (id: number) => {
-    try {
-      await fetch(`/api/delete`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(id),
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
+    await client.mutation("messages.delete", id);
     setMessages(messages.filter((msg) => msg.id != id));
   };
 
   return (
-    <div className={styles.container}>
-      <Header />
-      <div className={styles.dashboard}>
-        {messages
-          .reverse()
-          .map((message) => MessageView({ message, deleteMessage }))}
-      </div>
+    <div className={styles.dashboard}>
+      {messages.map((message) => MessageView({ message, deleteMessage }))}
     </div>
   );
 };
@@ -66,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   });
 
   return {
-    props: { messages },
+    props: { session, messages },
   };
 };
 

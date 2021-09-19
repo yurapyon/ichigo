@@ -4,9 +4,15 @@ import { PrismaClient } from "@prisma/client";
 import type { User } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
-import Header from "../lib/Header";
 import LengthReadout from "../lib/LengthReadout";
 import styles from "../styles/Submit.module.css";
+
+import type { AppRouter } from "./api/trpc/[trpc]";
+import { createTRPCClient } from "@trpc/client";
+
+const client = createTRPCClient<AppRouter>({
+  url: "http://localhost:3000/api/trpc",
+});
 
 type UserBio = string | null;
 
@@ -26,52 +32,41 @@ const Settings: React.FC<{ user: User }> = (props) => {
   };
 
   const submitSettings = async () => {
-    try {
-      await fetch(`/api/settings`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    await client.mutation("users.pushSettings", settings);
   };
 
   return (
-    <div className={styles.container}>
-      <Header />
-      <div className={styles.settings}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submitSettings();
-          }}
-        >
-          <div>
-            bio{" "}
-            <textarea
-              style={{ resize: "none" }}
-              rows={5}
-              onChange={(e) => setBio(e.target.value || null)}
-              value={settings.bio || ""}
-            />{" "}
-            <LengthReadout
-              len={settings.bio ? settings.bio.length : 0}
-              maxLen={100}
-            />
-          </div>
-          <div>
-            <input
-              type="submit"
-              value="submit"
-              disabled={
-                // TODO disable
-                false
-              }
-            />
-          </div>
-        </form>
-      </div>
+    <div className={styles.settings}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitSettings();
+        }}
+      >
+        <div>
+          bio{" "}
+          <textarea
+            style={{ resize: "none" }}
+            rows={5}
+            onChange={(e) => setBio(e.target.value || null)}
+            value={settings.bio || ""}
+          />{" "}
+          <LengthReadout
+            len={settings.bio ? settings.bio.length : 0}
+            maxLen={100}
+          />
+        </div>
+        <div>
+          <input
+            type="submit"
+            value="submit"
+            disabled={
+              // TODO disable
+              false
+            }
+          />
+        </div>
+      </form>
     </div>
   );
 };
@@ -89,7 +84,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   });
 
   return {
-    props: { user },
+    props: { session, user },
   };
 };
 

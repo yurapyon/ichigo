@@ -5,10 +5,17 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { PrismaClient } from "@prisma/client";
 import type { User } from "@prisma/client";
+import { getSession } from "next-auth/react";
 
-import Header from "../../lib/Header";
 import LengthReadout, { within } from "../../lib/LengthReadout";
 import styles from "../../styles/Submit.module.css";
+
+import type { AppRouter } from "../api/trpc/[trpc]";
+import { createTRPCClient } from "@trpc/client";
+
+const client = createTRPCClient<AppRouter>({
+  url: "http://localhost:3000/api/trpc",
+});
 
 interface MessageSubmitter {
   message: string;
@@ -25,16 +32,10 @@ const useMessageSubmitter = (username: string): MessageSubmitter => {
 
   const submitMessage: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    try {
-      await fetch(`/api/user/${username}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: message,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
+    await client.mutation("users.sendMessage", {
+      username,
+      message,
+    });
     setMessage("");
   };
 
@@ -95,33 +96,28 @@ const SubmitPage: NextPage<{ user: User }> = (props) => {
   const submitter = useMessageSubmitter(props.user?.name || "");
 
   if (!props.user) {
-    return (
-      <div className={styles.container}>
-        <Header />
-        user not found: {username}
-      </div>
-    );
+    // TODO
+    return <>user not found: {username} </>;
   }
 
   return (
-    <div className={styles.container}>
-      <Header />
-      <div className={styles.submitPage}>
-        <ProfileView user={props.user} />
-        <AskBox submitter={submitter} maxLen={100} />
-      </div>
+    <div className={styles.submitPage}>
+      <ProfileView user={props.user} />
+      <AskBox submitter={submitter} maxLen={100} />
     </div>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getSession({ req: context.req });
+
   const prisma = new PrismaClient();
 
   const username = context.params?.username;
   // TODO handle this differently
   if (typeof username != "string") {
     return {
-      props: { user: null },
+      props: { session, user: null },
     };
   }
 
@@ -130,7 +126,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   });
 
   return {
-    props: { user },
+    props: { session, user },
   };
 };
 
