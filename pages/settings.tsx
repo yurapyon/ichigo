@@ -7,12 +7,7 @@ import { getSession } from "next-auth/react";
 import LengthReadout from "../lib/LengthReadout";
 import styles from "../styles/Submit.module.css";
 
-import type { AppRouter } from "./api/trpc/[trpc]";
-import { createTRPCClient } from "@trpc/client";
-
-const client = createTRPCClient<AppRouter>({
-  url: "http://localhost:3000/api/trpc",
-});
+import { trpc } from "../utils/trpc";
 
 type UserBio = string | null;
 
@@ -21,6 +16,8 @@ interface UserSettings {
 }
 
 const Settings: React.FC<{ user: User }> = (props) => {
+  const pushSettingsMutation = trpc.useMutation("users.pushSettings");
+
   const [settings, setSettings] = useState({
     bio: props.user.bio,
   });
@@ -31,16 +28,12 @@ const Settings: React.FC<{ user: User }> = (props) => {
     setSettings(s);
   };
 
-  const submitSettings = async () => {
-    await client.mutation("users.pushSettings", settings);
-  };
-
   return (
     <div className={styles.settings}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          submitSettings();
+          pushSettingsMutation.mutate(settings);
         }}
       >
         <div>

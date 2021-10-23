@@ -10,12 +10,7 @@ import { getSession } from "next-auth/react";
 import LengthReadout, { within } from "../../lib/LengthReadout";
 import styles from "../../styles/Submit.module.css";
 
-import type { AppRouter } from "../api/trpc/[trpc]";
-import { createTRPCClient } from "@trpc/client";
-
-const client = createTRPCClient<AppRouter>({
-  url: "http://localhost:3000/api/trpc",
-});
+import { trpc } from "../../utils/trpc";
 
 interface MessageSubmitter {
   message: string;
@@ -26,16 +21,15 @@ interface MessageSubmitter {
 const useMessageSubmitter = (username: string): MessageSubmitter => {
   const [message, setMessage] = useState("");
 
+  const sendMessageMutation = trpc.useMutation("users.sendMessage");
+
   const changeMessage = (s: string) => {
     setMessage(s);
   };
 
   const submitMessage: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    await client.mutation("users.sendMessage", {
-      username,
-      message,
-    });
+    sendMessageMutation.mutate({ username, message });
     setMessage("");
   };
 

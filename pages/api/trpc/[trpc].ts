@@ -56,6 +56,19 @@ const users = createRouter()
         data: input,
       });
     },
+  })
+  .query("get-messages", {
+    resolve: async ({ ctx, input }) => {
+      const prisma = new PrismaClient();
+      const messages = await prisma.message.findMany({
+        where: {
+          user: {
+            name: ctx.session?.user?.name,
+          },
+        },
+      });
+      return messages;
+    },
   });
 
 const messages = createRouter().mutation("delete", {
@@ -81,21 +94,6 @@ const messages = createRouter().mutation("delete", {
     return result;
   },
 });
-/*
-  .query("getAll", {
-    resolve: async ({ ctx, input }) => {
-      const prisma = new PrismaClient();
-      const messages = await prisma.message.findMany({
-        where: {
-          user: {
-            name: ctx.session?.user?.name,
-          },
-        },
-      });
-      return messages;
-    },
-  });
-  */
 
 const appRouter = createRouter()
   .merge("users.", users)

@@ -28,10 +28,7 @@ const Home: NextPage = () => {
           </ul>
         </li>
         <li>integrate well with existing tools such as OBS.</li>
-        <li>
-          screen incoming messages for spam, inappropriate messages and hate
-          mail.
-        </li>
+        <li>screen incoming messages for spam.</li>
       </ul>
     </div>
   );
