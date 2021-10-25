@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import type { NextPage, GetServerSideProps } from "next";
-import Head from "next/head";
+import type { GetServerSideProps } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { PrismaClient } from "@prisma/client";
@@ -8,7 +7,6 @@ import type { User } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
 import LengthReadout, { within } from "../../lib/LengthReadout";
-import styles from "../../styles/Submit.module.css";
 
 import { trpc } from "../../utils/trpc";
 
@@ -36,67 +34,65 @@ const useMessageSubmitter = (username: string): MessageSubmitter => {
   return { message, changeMessage, submitMessage };
 };
 
-const ProfileView: React.FC<{ user: User }> = (props) => {
+const ProfileView: React.FC<{ user: User }> = ({ user }) => {
   // TODO handle !(user.image)
   return (
-    <div className={styles.profileView}>
+    <div className="flex flex-row mx-5">
       <div style={{ marginRight: "12px" }}>
-        <Image src={props.user.image || ""} width={100} height={100} />
+        <Image src={user.image || ""} width={100} height={100} />
       </div>
       <div>
-        <div style={{ fontWeight: "bold" }}>{props.user.name}</div>
+        <div style={{ fontWeight: "bold" }}>{user.name}</div>
         <div style={{ maxWidth: "300px", wordWrap: "break-word" }}>
-          {props.user.bio}
+          {user.bio}
         </div>
       </div>
     </div>
   );
 };
 
-const AskBox: React.FC<{ submitter: MessageSubmitter; maxLen: number }> = (
-  props
-) => {
+const AskBox: React.FC<{ submitter: MessageSubmitter; maxLen: number }> = ({
+  submitter,
+  maxLen,
+}) => {
   return (
-    <div className={styles.askBox}>
-      <form onSubmit={props.submitter.submitMessage}>
+    <div className="flex flex-col">
+      <form onSubmit={submitter.submitMessage}>
         <textarea
           style={{ resize: "none" }}
           rows={5}
-          onChange={(e) => props.submitter.changeMessage(e.target.value)}
+          onChange={(e) => submitter.changeMessage(e.target.value)}
           placeholder="say something nice~"
-          value={props.submitter.message}
+          value={submitter.message}
         />
         <div>
           <input
             type="submit"
             value="submit"
-            disabled={!within(props.submitter.message.length, 1, props.maxLen)}
+            disabled={!within(submitter.message.length, 1, maxLen)}
           />
-          <LengthReadout
-            len={props.submitter.message.length}
-            maxLen={props.maxLen}
-          />
+          <LengthReadout len={submitter.message.length} maxLen={maxLen} />
         </div>
       </form>
     </div>
   );
 };
 
-const SubmitPage: NextPage<{ user: User }> = (props) => {
+const SubmitPage: React.FC<{ user: User }> = ({ user }) => {
   const router = useRouter();
   const { username } = router.query;
 
   // TODO handle !(user.name) ? seems like a prisma problem or something
-  const submitter = useMessageSubmitter(props.user?.name || "");
+  const submitter = useMessageSubmitter(user?.name || "");
 
-  if (!props.user) {
+  if (!user) {
     // TODO
     return <>user not found: {username} </>;
   }
 
   return (
-    <div className={styles.submitPage}>
-      <ProfileView user={props.user} />
+    <div className="flex flex-col">
+      <ProfileView user={user} />
       <AskBox submitter={submitter} maxLen={100} />
     </div>
   );

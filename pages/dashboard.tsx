@@ -3,7 +3,6 @@ import type { NextPage, GetServerSideProps } from "next";
 import type { Message } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
-import styles from "../styles/Submit.module.css";
 import { trpc } from "../utils/trpc";
 
 const MessageView: React.FC<{ message: Message }> = ({ message }) => {
@@ -16,7 +15,7 @@ const MessageView: React.FC<{ message: Message }> = ({ message }) => {
   });
 
   return (
-    <div className={styles.message}>
+    <div className="bg-gray-200 mb-10 p-2">
       <p>{message.content}</p>
       <p>{message.createdAt.toString()}</p>
       <button onClick={() => deleteMessageMutation.mutate(message.id)}>
@@ -31,7 +30,7 @@ const Dashboard: NextPage<{ messages: Message[] }> = (props) => {
   if (!data) return null;
 
   return (
-    <div className={styles.dashboard}>
+    <div className="flew flex-col mx-auto">
       {data.map((message) => (
         <MessageView key={message.id} message={message} />
       ))}

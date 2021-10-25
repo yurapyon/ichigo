@@ -1,47 +1,45 @@
 import React from "react";
-import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 
-import styles from "../styles/Submit.module.css";
-
-const MaybeActiveLink: React.FC<{ href: string; linkName: string }> = (
-  props
-) => {
-  return useRouter().asPath === props.href ? (
-    <strong>{props.linkName} </strong>
+const MaybeActiveLink: React.FC<{ href: string; linkName: string }> = ({
+  href,
+  linkName,
+}) => {
+  return useRouter().asPath === href ? (
+    <span className="font-bold">{linkName}</span>
   ) : (
-    <Link href={props.href}>{props.linkName}</Link>
+    <Link href={href}>{linkName}</Link>
   );
 };
 
 const LeftNav: React.FC = () => {
   return (
-    <div className={styles.navLeft}>
+    <div className="float-left width-1/2">
       <MaybeActiveLink href="/" linkName="ichigo Q+A" />
     </div>
   );
 };
 
-const RightNav: React.FC<{ session?: Session }> = (props) => {
-  if (!props.session) {
+const RightNav: React.FC<{ session?: Session }> = ({ session }) => {
+  if (!session) {
     return (
-      <div className={styles.navRight}>
+      <div className="float-right width-1/2">
         <Link href="/api/auth/signin">log in</Link>
       </div>
     );
   } else {
     return (
-      <div className={styles.navRight}>
+      <div className="float-right width-1/2">
         <MaybeActiveLink
-          href={"/user/" + props.session.user?.name}
+          href={"/user/" + session.user?.name}
           linkName="submissions"
         />{" "}
         <MaybeActiveLink href="/dashboard" linkName="dashboard" />{" "}
         <MaybeActiveLink href="/settings" linkName="settings" /> {"- "}
-        {props.session.user?.name}{" "}
+        {session.user?.name}{" "}
         <button onClick={() => signOut()}>
           <a>log out</a>
         </button>
@@ -52,8 +50,8 @@ const RightNav: React.FC<{ session?: Session }> = (props) => {
 
 const Header: React.FC<{ session?: Session }> = ({ session }) => {
   return (
-    <div className={styles.header}>
-      <nav className={styles.topNav}>
+    <div className="bg-gray-300 mx-auto w-full">
+      <nav className="">
         <LeftNav />
         <RightNav session={session || undefined} />
       </nav>

@@ -1,25 +1,20 @@
 import React, { useState } from "react";
-import type { NextPage, GetServerSideProps } from "next";
+import type { GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
 import type { User } from "@prisma/client";
 import { getSession } from "next-auth/react";
 
 import LengthReadout from "../lib/LengthReadout";
-import styles from "../styles/Submit.module.css";
 
 import { trpc } from "../utils/trpc";
 
 type UserBio = string | null;
 
-interface UserSettings {
-  bio: UserBio;
-}
-
-const Settings: React.FC<{ user: User }> = (props) => {
+const Settings: React.FC<{ user: User }> = ({ user }) => {
   const pushSettingsMutation = trpc.useMutation("users.pushSettings");
 
   const [settings, setSettings] = useState({
-    bio: props.user.bio,
+    bio: user.bio,
   });
 
   const setBio = (to: UserBio) => {
@@ -29,7 +24,7 @@ const Settings: React.FC<{ user: User }> = (props) => {
   };
 
   return (
-    <div className={styles.settings}>
+    <div className="flew flex-col mx-auto">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -39,6 +34,7 @@ const Settings: React.FC<{ user: User }> = (props) => {
         <div>
           bio{" "}
           <textarea
+            className="border-2"
             style={{ resize: "none" }}
             rows={5}
             onChange={(e) => setBio(e.target.value || null)}

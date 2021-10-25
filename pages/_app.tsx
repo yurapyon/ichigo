@@ -5,15 +5,15 @@ import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "./api/trpc/[trpc]";
 
 import Header from "../lib/Header";
-import "../styles/globals.css";
-import styles from "../styles/Submit.module.css";
+
+import "tailwindcss/tailwind.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
       <Head> </Head>
-      <div className={styles.container}>
-        <Header session={pageProps.session}/>
+      <div className="container max-w-full mx-auto flex flex-col">
+        <Header session={pageProps.session} />
         <Component {...pageProps} />
       </div>
     </SessionProvider>

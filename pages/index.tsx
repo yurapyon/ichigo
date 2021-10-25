@@ -3,11 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { getSession } from "next-auth/react";
 
-import styles from "../styles/Submit.module.css";
-
 const Home: NextPage = () => {
   return (
-    <div className={styles.home}>
+    <div className="mx-auto flex flex-col">
       <p>
         <Image src="/logo_words.png" width={380} height={150} />
       </p>
@@ -15,8 +13,8 @@ const Home: NextPage = () => {
         ichigo is an anonymous q+a service for streamers!{" "}
         <Link href="https://github.com/yurapyon/ichigo">ichigo on github</Link>
       </p>
-      <h3>Planned Features:</h3>
-      <ul>
+      <h3 className="font-bold">Planned Features:</h3>
+      <ul className="list-disc">
         <li>
           provide tools for streamers to organize messages they{"'"}ve recieved
           for presentation on-stream.
